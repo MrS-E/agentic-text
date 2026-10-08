@@ -15,7 +15,7 @@ The Lab Bench profile rejects its explicit fluff phrases. The Simeon Stix German
 
 ## Connect a model provider
 
-Implement `TextGenerationClient` with the model provider of your choice. The repository intentionally includes no provider SDK, API key, or network endpoint because none was specified. Use separate clients/models for writing and evaluation when available; the evaluator, critic, claim extractor, and claim judge each have their own prompt adapter.
+Implement `TextGenerationClient` with the model provider of your choice. An example adapter for any OpenAI-compatible chat completions endpoint (OpenAI, Azure OpenAI, Ollama, LM Studio, vLLM, llama.cpp, ...) ships as `OpenAiCompatibleTextGenerationClient`; it uses only the JDK `HttpClient` and `kotlinx.serialization`, so no provider SDK is required. Use separate clients/models for writing and evaluation when available; the evaluator, critic, claim extractor, and claim judge each have their own prompt adapter.
 
 ```kotlin
 val skillRepository = JsonSkillRepository(Paths.get("."))
@@ -24,8 +24,13 @@ val profileRepository = SkillBackedWritingProfileRepository(
     profileCatalog = DefaultVerificationProfileCatalog(),
 )
 
-val writingModel: TextGenerationClient = /* provider adapter */
-val evaluationModel: TextGenerationClient = /* preferably a separate model */
+// Reads OPENAI_MODEL (required), OPENAI_BASE_URL (defaults to https://api.openai.com/v1),
+// and OPENAI_API_KEY (optional for local endpoints) so no secret is committed to source.
+val writingModel: TextGenerationClient = OpenAiCompatibleTextGenerationClient.fromEnvironment()
+val evaluationModel: TextGenerationClient = OpenAiCompatibleTextGenerationClient(
+    baseUrl = "http://localhost:11434/v1",
+    model = "llama3.1",
+)
 val claimExtractor = PromptedClaimExtractor(evaluationModel)
 val factChecker = EvidenceBackedClaimVerifier(
     claimExtractor = claimExtractor,
