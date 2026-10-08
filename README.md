@@ -61,6 +61,19 @@ val task = WritingTask(
 val outcome = pipeline.run(task)
 ```
 
+### Run the example end to end
+
+`dev.agentictext.examples.OpenAiCompatiblePipelineExample` wires the snippet above into a runnable program (skills are loaded from the repository root). Configure the endpoint through the environment and run:
+
+```shell
+export OPENAI_MODEL=gpt-4o-mini          # required
+export OPENAI_BASE_URL=http://localhost:11434/v1   # optional, defaults to https://api.openai.com/v1
+export OPENAI_API_KEY=...                # optional for local endpoints
+./gradlew runOpenAiCompatibleExample
+```
+
+`OpenAiCompatiblePipelineExampleTest` runs the same pipeline against a local fake chat completions server, so the full writer → claim verification → evaluation → critic → revision → acceptance flow is exercised without a real provider or API key.
+
 `KeywordEvidenceRetriever` is a small local baseline over the task's supplied documents, not a web search or vector database. Replace it with an implementation of `EvidenceRetriever` for a trusted document store or search service. Evidence is checked against the original document before a claim can be considered supported.
 
 For technical documentation, configure `WritingRequirements` with the approved exact terms, forbidden alternatives, and source-preservation flags. Use `exactTerms` for case-sensitive API names, file paths, commands, exception/product identifiers, and `exactPhrases` for wording that must remain verbatim. `preserveCode` automatically protects source code marked with backticks or fenced code blocks; unmarked prose is not treated as a code literal. The `SOURCE_FIDELITY` evaluator criterion handles meaning-level checks such as scope, exceptions, and modal strength; provide source documents so its judgment can cite evidence.

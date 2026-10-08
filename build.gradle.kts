@@ -24,3 +24,12 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+// Runs the end-to-end pipeline example against an OpenAI-compatible endpoint configured through
+// OPENAI_MODEL (required), OPENAI_BASE_URL, and OPENAI_API_KEY (see the example's KDoc).
+tasks.register<JavaExec>("runOpenAiCompatibleExample") {
+    group = "application"
+    description = "Runs the WritingPipeline end to end against an OpenAI-compatible chat completions endpoint."
+    mainClass.set("dev.agentictext.examples.OpenAiCompatiblePipelineExampleKt")
+    classpath = sourceSets["main"].runtimeClasspath
+}
